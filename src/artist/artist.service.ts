@@ -60,6 +60,7 @@ export class ArtistService {
     if (!artist) {
       throw new NotFoundException();
     }
+    this.myDBService.cleanArtist(id);
     return artist;
   }
 }

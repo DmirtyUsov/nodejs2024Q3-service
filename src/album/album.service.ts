@@ -38,7 +38,6 @@ export class AlbumService {
     if (!result) {
       throw new ForbiddenException();
     }
-    console.log(newAlbum);
     return newAlbum;
   }
 
@@ -63,6 +62,7 @@ export class AlbumService {
     if (!artist) {
       throw new NotFoundException();
     }
+    this.myDBService.cleanAlbum(id);
     return artist;
   }
 }

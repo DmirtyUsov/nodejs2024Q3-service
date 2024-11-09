@@ -64,6 +64,7 @@ export class TrackService {
     if (!track) {
       throw new NotFoundException();
     }
+    this.myDBService.cleanTrack(id);
     return track;
   }
 }

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MyDbModule } from './mydb/mydb.module';
@@ -9,7 +10,15 @@ import { AlbumModule } from './album/album.module';
 import { FavsModule } from './favs/favs.module';
 
 @Module({
-  imports: [MyDbModule, UserModule, TrackModule, ArtistModule, AlbumModule, FavsModule],
+  imports: [
+    MyDbModule,
+    UserModule,
+    TrackModule,
+    ArtistModule,
+    AlbumModule,
+    FavsModule,
+    ConfigModule.forRoot(),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

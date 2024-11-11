@@ -14,27 +14,40 @@ import {
 import { ArtistService } from './artist.service';
 import { ArtistModel } from './artist.model';
 import { UpdateArtistDto } from './update-artist.dto';
+import {
+  DeleteArtist,
+  GetArtist,
+  GetArtistById,
+  PostArtist,
+  PutArtist,
+} from './artist.swagger';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Artist')
 @Controller('artist')
 export class ArtistController {
   constructor(private readonly artistService: ArtistService) {}
 
   @Get()
+  @GetArtist()
   findAll(): ArtistModel[] {
     return this.artistService.findAll();
   }
 
   @Get(':id')
+  @GetArtistById()
   findOne(@Param('id', ParseUUIDPipe) id: string): ArtistModel {
     return this.artistService.findOne(id);
   }
 
   @Post()
+  @PostArtist()
   create(@Body(ValidationPipe) updateArtistDto: UpdateArtistDto): ArtistModel {
     return this.artistService.create(updateArtistDto);
   }
 
   @Put(':id')
+  @PutArtist()
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body(ValidationPipe) updateArtistDto: UpdateArtistDto,
@@ -44,6 +57,7 @@ export class ArtistController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @DeleteArtist()
   delete(@Param('id', ParseUUIDPipe) id: string): ArtistModel {
     return this.artistService.delete(id);
   }

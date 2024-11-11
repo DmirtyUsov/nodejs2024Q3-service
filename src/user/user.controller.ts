@@ -15,31 +15,44 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdatePasswordDto, UserModel } from './dto';
+import {
+  DeleteUser,
+  GetUser,
+  GetUserById,
+  PostUser,
+  PutUser,
+} from './user.swagger';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
+  @UseInterceptors(ClassSerializerInterceptor)
+  @GetUser()
   findAll(): UserModel[] {
     return this.userService.findAll();
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
+  @GetUserById()
   findOne(@Param('id', ParseUUIDPipe) id: string): UserModel {
     return this.userService.findOne(id);
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @Post()
+  @UseInterceptors(ClassSerializerInterceptor)
+  @PostUser()
   create(@Body(ValidationPipe) createUserDto: CreateUserDto): UserModel {
     return this.userService.create(createUserDto);
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
+  @PutUser()
   @Put(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   updatePassword(
     @Param('id', ParseUUIDPipe) id: string,
     @Body(ValidationPipe) updatePasswordDto: UpdatePasswordDto,
@@ -49,6 +62,7 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @DeleteUser()
   delete(@Param('id', ParseUUIDPipe) id: string): UserModel {
     return this.userService.delete(id);
   }

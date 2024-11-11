@@ -19,7 +19,7 @@ import { FavsModule } from './favs/favs.module';
     FavsModule,
     ConfigModule.forRoot(),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  // controllers: [AppController],
+  // providers: [AppService],
 })
 export class AppModule {}

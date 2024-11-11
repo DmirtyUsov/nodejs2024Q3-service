@@ -1,0 +1,64 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+  ValidationPipe,
+} from '@nestjs/common';
+import { TrackService } from './track.service';
+import { TrackModel } from './track.model';
+import { UpdateTrackDto } from './update-track.dto';
+import { ApiTags } from '@nestjs/swagger';
+import {
+  DeleteTrack,
+  GetTrack,
+  GetTrackById,
+  PostTrack,
+  PutTrack,
+} from './track.swagger';
+
+@ApiTags('Track')
+@Controller('track')
+export class TrackController {
+  constructor(private readonly trackService: TrackService) {}
+
+  @Get()
+  @GetTrack()
+  findAll(): TrackModel[] {
+    return this.trackService.findAll();
+  }
+
+  @Get(':id')
+  @GetTrackById()
+  findOne(@Param('id', ParseUUIDPipe) id: string): TrackModel {
+    return this.trackService.findOne(id);
+  }
+
+  @Post()
+  @PostTrack()
+  create(@Body(ValidationPipe) updateTrackDto: UpdateTrackDto): TrackModel {
+    return this.trackService.create(updateTrackDto);
+  }
+
+  @Put(':id')
+  @PutTrack()
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(ValidationPipe) updateTrackDto: UpdateTrackDto,
+  ): TrackModel {
+    return this.trackService.update(id, updateTrackDto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @DeleteTrack()
+  delete(@Param('id', ParseUUIDPipe) id: string): TrackModel {
+    return this.trackService.delete(id);
+  }
+}

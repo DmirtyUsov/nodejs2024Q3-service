@@ -1,66 +1,60 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { MyDBService } from 'src/mydb/mydb.service';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ArtistModel } from './artist.model';
 import { UpdateArtistDto } from './update-artist.dto';
-import { randomUUID } from 'crypto';
+import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class ArtistService {
-  constructor(private readonly myDBService: MyDBService) {}
+  constructor(private readonly databaseService: DatabaseService) {}
 
-  findAll(): ArtistModel[] {
-    return this.myDBService.artist.list();
+  async findAll(): Promise<ArtistModel[]> {
+    return await this.databaseService.artist.findMany();
   }
 
-  findOne(id: string): ArtistModel {
-    const artist = this.myDBService.artist.get(id);
-    if (!artist) {
-      throw new NotFoundException();
+  async findOne(id: string): Promise<ArtistModel> {
+    try {
+      const artist = await this.databaseService.artist.findUniqueOrThrow({
+        where: { id },
+      });
+      return artist;
+    } catch (error) {
+      DatabaseService.handleError(error);
     }
-    return artist;
   }
 
-  create(updateArtistDto: UpdateArtistDto): ArtistModel {
-    const { name, grammy } = updateArtistDto;
-    const id = randomUUID();
-
-    const newArtist: ArtistModel = {
-      id,
-      name,
-      grammy,
-    };
-    const result = this.myDBService.artist.add(id, newArtist);
+  async create(updateArtistDto: UpdateArtistDto): Promise<ArtistModel> {
+    const result = await this.databaseService.artist.create({
+      data: updateArtistDto,
+    });
     if (!result) {
       throw new ForbiddenException();
     }
-    return newArtist;
-  }
-
-  update(id: string, updateArtistDto: UpdateArtistDto): ArtistModel {
-    const { name, grammy } = updateArtistDto;
-    const artist: ArtistModel = this.myDBService.artist.get(id);
-
-    if (!artist) {
-      throw new NotFoundException();
-    }
-
-    artist.name = name;
-    artist.grammy = grammy;
-
-    const result = this.myDBService.artist.update(id, artist);
     return result;
   }
 
-  delete(id: string): ArtistModel {
-    const artist = this.myDBService.artist.delete(id);
-    if (!artist) {
-      throw new NotFoundException();
+  async update(
+    id: string,
+    updateArtistDto: UpdateArtistDto,
+  ): Promise<ArtistModel> {
+    try {
+      const result = await this.databaseService.artist.update({
+        where: { id },
+        data: updateArtistDto,
+      });
+      return result;
+    } catch (error) {
+      DatabaseService.handleError(error);
     }
-    this.myDBService.cleanArtist(id);
-    return artist;
+  }
+
+  async delete(id: string): Promise<ArtistModel> {
+    try {
+      const artist = await this.databaseService.artist.delete({
+        where: { id },
+      });
+      return artist;
+    } catch (error) {
+      DatabaseService.handleError(error);
+    }
   }
 }

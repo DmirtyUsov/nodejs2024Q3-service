@@ -30,19 +30,21 @@ export class ArtistController {
 
   @Get()
   @GetArtist()
-  findAll(): ArtistModel[] {
+  findAll(): Promise<ArtistModel[]> {
     return this.artistService.findAll();
   }
 
   @Get(':id')
   @GetArtistById()
-  findOne(@Param('id', ParseUUIDPipe) id: string): ArtistModel {
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<ArtistModel> {
     return this.artistService.findOne(id);
   }
 
   @Post()
   @PostArtist()
-  create(@Body(ValidationPipe) updateArtistDto: UpdateArtistDto): ArtistModel {
+  create(
+    @Body(ValidationPipe) updateArtistDto: UpdateArtistDto,
+  ): Promise<ArtistModel> {
     return this.artistService.create(updateArtistDto);
   }
 
@@ -51,14 +53,14 @@ export class ArtistController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body(ValidationPipe) updateArtistDto: UpdateArtistDto,
-  ): ArtistModel {
+  ): Promise<ArtistModel> {
     return this.artistService.update(id, updateArtistDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @DeleteArtist()
-  delete(@Param('id', ParseUUIDPipe) id: string): ArtistModel {
+  delete(@Param('id', ParseUUIDPipe) id: string): Promise<ArtistModel> {
     return this.artistService.delete(id);
   }
 }

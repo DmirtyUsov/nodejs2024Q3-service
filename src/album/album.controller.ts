@@ -30,19 +30,21 @@ export class AlbumController {
 
   @Get()
   @GetAlbum()
-  findAll(): AlbumModel[] {
+  findAll(): Promise<AlbumModel[]> {
     return this.albumService.findAll();
   }
 
   @Get(':id')
   @GetAlbumById()
-  findOne(@Param('id', ParseUUIDPipe) id: string): AlbumModel {
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<AlbumModel> {
     return this.albumService.findOne(id);
   }
 
   @Post()
   @PostAlbum()
-  create(@Body(ValidationPipe) updateAlbumDto: UpdateAlbumDto): AlbumModel {
+  create(
+    @Body(ValidationPipe) updateAlbumDto: UpdateAlbumDto,
+  ): Promise<AlbumModel> {
     return this.albumService.create(updateAlbumDto);
   }
 
@@ -51,14 +53,14 @@ export class AlbumController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body(ValidationPipe) updateAlbumDto: UpdateAlbumDto,
-  ): AlbumModel {
+  ): Promise<AlbumModel> {
     return this.albumService.update(id, updateAlbumDto);
   }
 
   @Delete(':id')
   @DeleteAlbum()
   @HttpCode(HttpStatus.NO_CONTENT)
-  delete(@Param('id', ParseUUIDPipe) id: string): AlbumModel {
+  delete(@Param('id', ParseUUIDPipe) id: string): Promise<AlbumModel> {
     return this.albumService.delete(id);
   }
 }

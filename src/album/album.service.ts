@@ -1,68 +1,57 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { MyDBService } from 'src/mydb/mydb.service';
+import { Injectable } from '@nestjs/common';
 import { AlbumModel } from './album.model';
 import { UpdateAlbumDto } from './update-album.dto';
-import { randomUUID } from 'crypto';
+import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class AlbumService {
-  constructor(private readonly myDBService: MyDBService) {}
+  constructor(private readonly databaseService: DatabaseService) {}
 
-  findAll(): AlbumModel[] {
-    return this.myDBService.album.list();
+  async findAll(): Promise<AlbumModel[]> {
+    return await this.databaseService.album.findMany();
   }
 
-  findOne(id: string): AlbumModel {
-    const artist = this.myDBService.album.get(id);
-    if (!artist) {
-      throw new NotFoundException();
+  async findOne(id: string): Promise<AlbumModel> {
+    try {
+      const artist = await this.databaseService.album.findUniqueOrThrow({
+        where: { id },
+      });
+      return artist;
+    } catch (error) {
+      DatabaseService.handleError(error);
     }
-    return artist;
   }
 
-  create(updateAlbumDto: UpdateAlbumDto): AlbumModel {
-    const { name, year, artistId } = updateAlbumDto;
-    const id = randomUUID();
-
-    const newAlbum: AlbumModel = {
-      id,
-      name,
-      year,
-      artistId,
-    };
-    const result = this.myDBService.album.add(id, newAlbum);
-    if (!result) {
-      throw new ForbiddenException();
-    }
-    return newAlbum;
-  }
-
-  update(id: string, updateAlbumDto: UpdateAlbumDto): AlbumModel {
-    const { name, year, artistId } = updateAlbumDto;
-    const album: AlbumModel = this.myDBService.album.get(id);
-
-    if (!album) {
-      throw new NotFoundException();
-    }
-
-    album.name = name;
-    album.year = year;
-    album.artistId = artistId;
-
-    const result = this.myDBService.album.update(id, album);
+  async create(updateAlbumDto: UpdateAlbumDto): Promise<AlbumModel> {
+    const result = await this.databaseService.album.create({
+      data: updateAlbumDto,
+    });
     return result;
   }
 
-  delete(id: string): AlbumModel {
-    const artist = this.myDBService.album.delete(id);
-    if (!artist) {
-      throw new NotFoundException();
+  async update(
+    id: string,
+    updateAlbumDto: UpdateAlbumDto,
+  ): Promise<AlbumModel> {
+    try {
+      const result = await this.databaseService.album.update({
+        where: { id },
+        data: updateAlbumDto,
+      });
+      return result;
+    } catch (error) {
+      DatabaseService.handleError(error);
     }
-    this.myDBService.cleanAlbum(id);
-    return artist;
+  }
+
+  async delete(id: string): Promise<AlbumModel> {
+    try {
+      const artist = await this.databaseService.album.delete({
+        where: { id },
+      });
+      return artist;
+    } catch (error) {
+      DatabaseService.handleError(error);
+    }
   }
 }

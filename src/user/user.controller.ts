@@ -32,21 +32,23 @@ export class UserController {
   @Get()
   @UseInterceptors(ClassSerializerInterceptor)
   @GetUser()
-  findAll(): UserModel[] {
+  findAll(): Promise<UserModel[]> {
     return this.userService.findAll();
   }
 
   @Get(':id')
   @UseInterceptors(ClassSerializerInterceptor)
   @GetUserById()
-  findOne(@Param('id', ParseUUIDPipe) id: string): UserModel {
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<UserModel> {
     return this.userService.findOne(id);
   }
 
   @Post()
   @UseInterceptors(ClassSerializerInterceptor)
   @PostUser()
-  create(@Body(ValidationPipe) createUserDto: CreateUserDto): UserModel {
+  create(
+    @Body(ValidationPipe) createUserDto: CreateUserDto,
+  ): Promise<UserModel> {
     return this.userService.create(createUserDto);
   }
 
@@ -56,14 +58,14 @@ export class UserController {
   updatePassword(
     @Param('id', ParseUUIDPipe) id: string,
     @Body(ValidationPipe) updatePasswordDto: UpdatePasswordDto,
-  ): UserModel {
+  ): Promise<UserModel> {
     return this.userService.updatePassword(id, updatePasswordDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @DeleteUser()
-  delete(@Param('id', ParseUUIDPipe) id: string): UserModel {
+  delete(@Param('id', ParseUUIDPipe) id: string): Promise<UserModel> {
     return this.userService.delete(id);
   }
 }

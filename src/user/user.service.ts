@@ -3,57 +3,58 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { MyDBService } from 'src/mydb/mydb.service';
+
 import { CreateUserDto, UpdatePasswordDto, UserModel } from './dto';
-import { randomUUID } from 'crypto';
 import { createHash } from 'node:crypto';
+import { DatabaseService } from 'src/database/database.service';
 
 const ALGORITHM = 'sha256';
 const ENCODING = 'hex';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly myDBService: MyDBService) {}
+  constructor(private readonly databaseService: DatabaseService) {}
 
-  findAll(): UserModel[] {
-    return this.myDBService.user.list().map((user) => new UserModel(user));
+  async findAll(): Promise<UserModel[]> {
+    return await this.databaseService.extended.user.findMany();
   }
 
-  findOne(id: string): UserModel {
-    const userDto = this.myDBService.user.get(id);
+  async findOne(id: string): Promise<UserModel> {
+    const userDto = await this.databaseService.extended.user.findUnique({
+      where: { id },
+    });
     if (!userDto) {
       throw new NotFoundException();
     }
     return new UserModel(userDto);
   }
 
-  create(createUserDto: CreateUserDto): UserModel {
+  async create(createUserDto: CreateUserDto): Promise<UserModel> {
     const { password, login } = createUserDto;
     const hash = createHash(ALGORITHM).update(password);
 
-    const id = randomUUID();
-    const moment = Date.now();
-
-    const newUser: UserModel = new UserModel({
-      id,
-      password: hash.digest(ENCODING),
-      login,
-      createdAt: moment,
-      updatedAt: moment,
-      version: 1,
+    const result = await this.databaseService.extended.user.create({
+      data: { login, password: hash.digest(ENCODING) },
     });
-    const result = this.myDBService.user.add(id, newUser);
+
     if (!result) {
       throw new ForbiddenException();
     }
-    return newUser;
+    return new UserModel(result);
   }
 
-  updatePassword(id: string, updatePasswordDto: UpdatePasswordDto): UserModel {
+  async updatePassword(
+    id: string,
+    updatePasswordDto: UpdatePasswordDto,
+  ): Promise<UserModel> {
     const { oldPassword, newPassword } = updatePasswordDto;
-    const userDto: UserModel = this.myDBService.user.get(id);
+    const user: UserModel = await this.databaseService.extended.user.findUnique(
+      {
+        where: { id },
+      },
+    );
 
-    if (!userDto) {
+    if (!user) {
       throw new NotFoundException();
     }
 
@@ -61,26 +62,27 @@ export class UserService {
       .update(oldPassword)
       .digest(ENCODING);
 
-    if (oldPasswordHash !== userDto.password) {
+    if (oldPasswordHash !== user.password) {
       throw new ForbiddenException();
     }
-    const moment = Date.now();
 
-    userDto.updatedAt = moment;
-    userDto.version = userDto.version + 1;
-    userDto.password = createHash(ALGORITHM)
-      .update(newPassword)
-      .digest(ENCODING);
+    user.password = createHash(ALGORITHM).update(newPassword).digest(ENCODING);
 
-    const result = this.myDBService.user.update(id, userDto);
+    const result = await this.databaseService.extended.user.update({
+      where: { id },
+      data: { password: user.password, version: { increment: 1 } },
+    });
     return new UserModel(result);
   }
 
-  delete(id: string): UserModel {
-    const userDto = this.myDBService.user.delete(id);
-    if (!userDto) {
-      throw new NotFoundException();
+  async delete(id: string): Promise<UserModel> {
+    try {
+      const user = await this.databaseService.extended.user.delete({
+        where: { id },
+      });
+      return new UserModel(user);
+    } catch (error) {
+      DatabaseService.handleError(error);
     }
-    return new UserModel(userDto);
   }
 }

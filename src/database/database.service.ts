@@ -1,5 +1,7 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { PrismaQueryError } from './prisma.query.error';
 
 @Injectable()
 export class DatabaseService extends PrismaClient implements OnModuleInit {
@@ -16,6 +18,15 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
     }
 
     return this._prisma;
+  }
+
+  static handleError(error: unknown) {
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code == PrismaQueryError.RecordsNotFound) {
+        throw new NotFoundException();
+      }
+    }
+    throw error;
   }
 }
 

@@ -1,70 +1,59 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { MyDBService } from 'src/mydb/mydb.service';
+import { Injectable } from '@nestjs/common';
 import { TrackModel } from './track.model';
 import { UpdateTrackDto } from './update-track.dto';
-import { randomUUID } from 'crypto';
+import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class TrackService {
-  constructor(private readonly myDBService: MyDBService) {}
+  constructor(private readonly databaseService: DatabaseService) {}
 
-  findAll(): TrackModel[] {
-    return this.myDBService.track.list();
+  async findAll(): Promise<TrackModel[]> {
+    return await this.databaseService.track.findMany();
   }
 
-  findOne(id: string): TrackModel {
-    const artist = this.myDBService.track.get(id);
-    if (!artist) {
-      throw new NotFoundException();
+  async findOne(id: string): Promise<TrackModel> {
+    try {
+      const artist = await this.databaseService.track.findUniqueOrThrow({
+        where: { id },
+      });
+      return artist;
+    } catch (error) {
+      DatabaseService.handleError(error);
     }
-    return artist;
   }
 
-  create(updateTrackDto: UpdateTrackDto): TrackModel {
-    const { name, albumId, artistId, duration } = updateTrackDto;
-    const id = randomUUID();
-
-    const newTrack: TrackModel = {
-      id,
-      name,
-      artistId,
-      albumId,
-      duration,
-    };
-    const result = this.myDBService.track.add(id, newTrack);
-    if (!result) {
-      throw new ForbiddenException();
+  async create(updateTrackDto: UpdateTrackDto): Promise<TrackModel> {
+    try {
+      const result = await this.databaseService.track.create({
+        data: updateTrackDto,
+      });
+      return result;
+    } catch (error) {
+      DatabaseService.handleError(error);
     }
-    return newTrack;
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto): TrackModel {
-    const { name, albumId, artistId, duration } = updateTrackDto;
-    const track: TrackModel = this.myDBService.track.get(id);
-
-    if (!track) {
-      throw new NotFoundException();
+  async update(
+    id: string,
+    updateTrackDto: UpdateTrackDto,
+  ): Promise<TrackModel> {
+    try {
+      const result = await this.databaseService.track.update({
+        where: { id },
+        data: updateTrackDto,
+      });
+      return result;
+    } catch (error) {
+      DatabaseService.handleError(error);
     }
-
-    track.name = name;
-    track.albumId = albumId;
-    track.artistId = artistId;
-    track.duration = duration;
-
-    const result = this.myDBService.track.update(id, track);
-    return result;
   }
 
-  delete(id: string): TrackModel {
-    const track = this.myDBService.track.delete(id);
-    if (!track) {
-      throw new NotFoundException();
+  async delete(id: string): Promise<TrackModel> {
+    try {
+      const track = await this.databaseService.track.delete({ where: { id } });
+      return track;
+    } catch (error) {
+      DatabaseService.handleError(error);
     }
-    this.myDBService.cleanTrack(id);
-    return track;
   }
 }

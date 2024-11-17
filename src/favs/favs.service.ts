@@ -1,72 +1,150 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
-import { MyDBService } from 'src/mydb/mydb.service';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { FavoritesDto } from './favorites.dto';
-import { FavTables } from 'src/in-memory-db/favorites.db';
+import { DatabaseService } from 'src/database/database.service';
+
+const tempUser = {
+  login: 'User for Favorites tests',
+  password: 'password',
+};
+
+enum FavTables {
+  artist = 'artist',
+  album = 'album',
+  track = 'track',
+}
 
 @Injectable()
 export class FavsService {
-  constructor(private readonly myDBService: MyDBService) {}
-
-  findAll(): FavoritesDto {
-    return this.myDBService.getFavorites();
+  private userIdForTest: string;
+  constructor(private readonly databaseService: DatabaseService) {
+    this.databaseService.user
+      .findFirst({
+        where: {
+          login: tempUser.login,
+        },
+      })
+      .then(async (user) => {
+        if (!user) {
+          user = await this.databaseService.user.create({ data: tempUser });
+        }
+        this.userIdForTest = user.id;
+      });
   }
 
-  addArtist(id: string): boolean {
+  async findAll(userId: string = this.userIdForTest): Promise<FavoritesDto> {
+    const result: FavoritesDto = {
+      albums: [],
+      artists: [],
+      tracks: [],
+    };
+
+    const data = await this.databaseService.user.findUnique({
+      where: { id: userId },
+      select: {
+        FavsArtists: { select: { artist: true } },
+        FavsAlbums: { select: { album: true } },
+        FavsTracks: { select: { track: true } },
+      },
+    });
+
+    result.artists = data.FavsArtists.map((item) => item.artist);
+    result.albums = data.FavsAlbums.map((item) => item.album);
+    result.tracks = data.FavsTracks.map((item) => item.track);
+    return result;
+  }
+
+  async addArtist(
+    id: string,
+    userId: string = this.userIdForTest,
+  ): Promise<void> {
     const table = FavTables.artist;
-    const result = this.myDBService.addFavorites(table, id);
+
+    const result = await this.databaseService.artist.findUnique({
+      where: { id },
+    });
     if (!result) {
       throw new UnprocessableEntityException(makeErrorMessage(table, id));
     }
-    return result;
+    await this.databaseService.favsArtists.create({
+      data: { userId, artistId: id },
+    });
   }
 
-  addTrack(id: string): boolean {
+  async addTrack(
+    id: string,
+    userId: string = this.userIdForTest,
+  ): Promise<void> {
     const table = FavTables.track;
-    const result = this.myDBService.addFavorites(table, id);
+    const result = await this.databaseService.track.findUnique({
+      where: { id },
+    });
     if (!result) {
       throw new UnprocessableEntityException(makeErrorMessage(table, id));
     }
-    return result;
+    await this.databaseService.favsTracks.create({
+      data: { userId, trackId: id },
+    });
   }
 
-  addAlbum(id: string): boolean {
+  async addAlbum(
+    id: string,
+    userId: string = this.userIdForTest,
+  ): Promise<void> {
     const table = FavTables.album;
-    const result = this.myDBService.addFavorites(table, id);
+    const result = await this.databaseService.album.findUnique({
+      where: { id },
+    });
     if (!result) {
       throw new UnprocessableEntityException(makeErrorMessage(table, id));
     }
-    return result;
+    await this.databaseService.favsAlbums.create({
+      data: { userId, albumId: id },
+    });
   }
 
-  removeArtist(id: string): boolean {
+  async removeArtist(
+    id: string,
+    userId: string = this.userIdForTest,
+  ): Promise<void> {
     const table = FavTables.artist;
-    const result = this.myDBService.removeFavorites(table, id);
-    if (!result) {
-      throw new NotFoundException(makeErrorMessage(table, id, true));
+    try {
+      await this.databaseService.favsArtists.delete({
+        where: { userId_artistId: { userId, artistId: id } },
+      });
+    } catch (error) {
+      const message = makeErrorMessage(table, id, true);
+      DatabaseService.handleError(error, message);
     }
-    return result;
   }
 
-  removeAlbum(id: string): boolean {
+  async removeAlbum(id: string, userId: string = this.userIdForTest) {
     const table = FavTables.album;
-    const result = this.myDBService.removeFavorites(table, id);
-    if (!result) {
-      throw new NotFoundException(makeErrorMessage(table, id, true));
+    try {
+      const result = await this.databaseService.favsAlbums
+        .delete({
+          where: { userId_albumId: { userId, albumId: id } },
+        })
+        .catch((error) => DatabaseService.handleError(error));
+      console.log('result', result);
+    } catch (error) {
+      const message = makeErrorMessage(table, id, true);
+      DatabaseService.handleError(error, message);
     }
-    return result;
   }
 
-  removeTrack(id: string): boolean {
+  async removeTrack(
+    id: string,
+    userId: string = this.userIdForTest,
+  ): Promise<void> {
     const table = FavTables.track;
-    const result = this.myDBService.removeFavorites(table, id);
-    if (!result) {
-      throw new NotFoundException(makeErrorMessage(table, id, true));
+    try {
+      await this.databaseService.favsTracks.delete({
+        where: { userId_trackId: { userId, trackId: id } },
+      });
+    } catch (error) {
+      const message = makeErrorMessage(table, id, true);
+      DatabaseService.handleError(error, message);
     }
-    return result;
   }
 }
 

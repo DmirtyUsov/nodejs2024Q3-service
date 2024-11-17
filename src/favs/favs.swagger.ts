@@ -1,10 +1,12 @@
 import { applyDecorators } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiCreatedResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { FavoritesDto } from './favorites.dto';
 import { ApiUUIDParam } from 'src/swagger.decorators';
@@ -29,13 +31,13 @@ export const AddFavorite = (entity: string) => {
       summary: `Add ${entity} to Favorites.`,
       description: `Adds ${entity} to Favorites.`,
     }),
-    ApiOkResponse({
+    ApiCreatedResponse({
       description: `The ${entity} has been added`,
     }),
     ApiBadRequestResponse({
       description: 'Bad request. Id is invalid (not uuid).',
     }),
-    ApiNotFoundResponse({
+    ApiUnprocessableEntityResponse({
       description: `${entity} not found.`,
     }),
   );

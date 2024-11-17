@@ -120,12 +120,11 @@ export class FavsService {
   async removeAlbum(id: string, userId: string = this.userIdForTest) {
     const table = FavTables.album;
     try {
-      const result = await this.databaseService.favsAlbums
+      await this.databaseService.favsAlbums
         .delete({
           where: { userId_albumId: { userId, albumId: id } },
         })
         .catch((error) => DatabaseService.handleError(error));
-      console.log('result', result);
     } catch (error) {
       const message = makeErrorMessage(table, id, true);
       DatabaseService.handleError(error, message);

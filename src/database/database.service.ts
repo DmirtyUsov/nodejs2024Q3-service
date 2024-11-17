@@ -22,7 +22,6 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
 
   static handleError(error: unknown, message?: string) {
     if (error instanceof PrismaClientKnownRequestError) {
-      console.log(error.code);
       if (error.code == PrismaQueryError.RecordsNotFound) {
         throw new NotFoundException(message);
       }

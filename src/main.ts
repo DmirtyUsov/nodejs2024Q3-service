@@ -8,7 +8,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Home Library Service')
-    .setDescription('Home music library service. Part I')
+    .setDescription('Home music library service. Part II')
     .setVersion('1.0')
     .build();
   const documentFactory = SwaggerModule.createDocument(app, config);

@@ -1,7 +1,8 @@
 name: hls24q3-part2
+
 services:
   hls-database:
-    image: postgres:alpine
+    image: dimausov/hls24q3-db:latest
     ports:
       - 5432:${DB_CONTAINER_PORT}
     environment:
@@ -13,6 +14,28 @@ services:
       - db_data:/var/lib/postgresql/data
       - db_logs:/logs
     restart: always
+    networks:
+      - hls-network
+
+  hls-app:
+    image: dimausov/hls24q3-app:latest
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - hls-database
+    networks:
+      - hls-network
+    restart: always
+
+networks:
+  hls-network:
+    ipam:
+      driver: default
+      config:
+        - subnet: '192.168.0.0/24'
+          gateway: '192.168.0.1'
 
 volumes:
   db_data:

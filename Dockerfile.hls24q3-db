@@ -1,0 +1,5 @@
+FROM postgres:alpine
+RUN mkdir -p /logs
+RUN chown -R postgres:postgres /logs
+RUN chmod -R 777 /logs
+CMD ["postgres", "-c", "logging_collector=on", "-c" ,"log_destination=stderr", "-c", "log_directory=/logs"]

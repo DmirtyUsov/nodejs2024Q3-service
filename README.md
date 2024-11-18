@@ -4,12 +4,13 @@
 
 - Git - [Download & Install Git](https://git-scm.com/downloads).
 - Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+- Docker - [Install Docker Desktop](https://docs.docker.com/desktop/)
 
 ## Downloading
 
 ```
 git clone git@github.com:DmirtyUsov/nodejs2024Q3-service.git
-git checkout part1
+git checkout part-2
 ```
 
 ## Installing NPM modules
@@ -20,18 +21,25 @@ npm install
 
 ## Running application
 
-Create `.env` file (based on .env.example)
+Rename `.env.example` file
+```
+mv .env.example .env
+```
+Run container
+```
+docker compose up -d
+```
+First run will download two images from [DockerHub](https://hub.docker.com/repositories/dimausov) (104 and 95 MB)
 
-```
-npm start
-```
+It takes **15 seconds** for the container to start. Please be passionate about it   
 
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-
+## Vulnerabilities scanning
+```
+npm run scan
+```
 ## Testing
-
-After application running open new terminal and enter:
 
 To run all tests without authorization
 

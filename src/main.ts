@@ -1,16 +1,23 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { MyLoggerService } from './my-logger/my-logger.service';
+import { AllExceptionsFilter } from './all-exceptions.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+    logger: false,
+  });
   app.useLogger(app.get(MyLoggerService));
+
+  const { httpAdapter } = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
 
   const config = new DocumentBuilder()
     .setTitle('Home Library Service')
-    .setDescription('Home music library service. Part II')
+    .setDescription('Home music library service. Part III')
     .setVersion('1.0')
     .build();
   const documentFactory = SwaggerModule.createDocument(app, config);

@@ -14,7 +14,7 @@ export class MyLoggerService extends ConsoleLogger {
   }
 
   error(message: unknown, stack?: unknown, context?: unknown): void {
-    const entry = `Error ${stack}\t${context}\t${message}`;
+    const entry = `${context}\t${message}\t${stack}`;
     this.logToFile(entry);
     super.error(message, stack, context);
   }
@@ -22,7 +22,7 @@ export class MyLoggerService extends ConsoleLogger {
   protected async logToFile(entry: string) {
     const formattedEntry = `${Intl.DateTimeFormat('en-GB', {
       dateStyle: 'short',
-      timeStyle: 'short',
+      timeStyle: 'medium',
     }).format(new Date())}\t${entry}\n`;
 
     try {

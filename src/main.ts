@@ -8,9 +8,21 @@ import { AllExceptionsFilter } from './all-exceptions.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
-    logger: false,
   });
-  app.useLogger(app.get(MyLoggerService));
+  const myLogger = app.get(MyLoggerService);
+  app.useLogger(myLogger);
+
+  const level = app.get(ConfigService).get<number>('MY_LOGGER_LEVEL');
+  myLogger.setLoggingLevel(level);
+
+  // For easy checking of ON levels
+  const levelOn = `level is ON`;
+  const ctx = 'MyLogger from main.ts';
+  myLogger.error(`Error ${levelOn}`, '', ctx);
+  myLogger.warn(`Warn ${levelOn}`, ctx);
+  myLogger.log(`Log ${levelOn}`, ctx);
+  myLogger.debug(`Debug ${levelOn}`, ctx);
+  myLogger.verbose(`Verbose ${levelOn}`, ctx);
 
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
@@ -24,6 +36,7 @@ async function bootstrap() {
   SwaggerModule.setup('doc', app, documentFactory);
 
   const port = app.get(ConfigService).get<number>('PORT') || 4000;
+
   await app.listen(port);
 }
 bootstrap();

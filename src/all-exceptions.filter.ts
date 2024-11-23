@@ -3,17 +3,13 @@ import {
   Catch,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
 import { PrismaClientValidationError } from '@prisma/client/runtime/library';
-import { MyLoggerService } from './my-logger/my-logger.service';
 
 @Catch()
 export class AllExceptionsFilter extends BaseExceptionFilter {
-  private readonly logger: MyLoggerService = new MyLoggerService(
-    AllExceptionsFilter.name,
-  );
-
   catch(exception: unknown, host: ArgumentsHost): void {
     const error = {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -31,7 +27,7 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
       error.message = exception.message;
     }
 
-    this.logger.error(`${error.message}`, '', AllExceptionsFilter.name);
+    Logger.error(`${error.message}`, '', AllExceptionsFilter.name);
 
     super.catch(exception, host);
   }

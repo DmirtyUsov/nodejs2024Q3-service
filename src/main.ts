@@ -9,15 +9,22 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
+  const port = app.get(ConfigService).get<number>('PORT') || 4000;
   const myLogger = app.get(MyLoggerService);
   app.useLogger(myLogger);
 
   const level = app.get(ConfigService).get<number>('MY_LOGGER_LEVEL');
+  const logFileMaxSize = app
+    .get(ConfigService)
+    .get<number>('LOG_FILE_SIZE_KB_MAX');
+
   myLogger.setLoggingLevel(level);
+  myLogger.setFileSize(logFileMaxSize);
 
   // For easy checking of ON levels
   const levelOn = `level is ON`;
   const ctx = 'MyLogger from main.ts';
+  myLogger.log(`App on port ${port}`, '** New Start **');
   myLogger.error(`Error ${levelOn}`, '', ctx);
   myLogger.warn(`Warn ${levelOn}`, ctx);
   myLogger.log(`Log ${levelOn}`, ctx);
@@ -34,8 +41,6 @@ async function bootstrap() {
     .build();
   const documentFactory = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('doc', app, documentFactory);
-
-  const port = app.get(ConfigService).get<number>('PORT') || 4000;
 
   await app.listen(port);
 }

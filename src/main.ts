@@ -33,6 +33,7 @@ async function bootstrap() {
   myLogger.verbose(`Verbose ${levelOn}`, ctx);
 
   app.use(loggerRequestResponse);
+
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
 
@@ -45,5 +46,14 @@ async function bootstrap() {
   SwaggerModule.setup('doc', app, documentFactory);
 
   await app.listen(port);
+
+  process.on('uncaughtException', (error) => {
+    myLogger.error(`${error}`, 'Uncaught Exception');
+    process.exit(1);
+  });
+
+  process.on('unhandledRejection', (reason) => {
+    myLogger.error(`${reason}`, 'Unhandled Rejection');
+  });
 }
 bootstrap();

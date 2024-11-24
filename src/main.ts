@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { MyLoggerService } from './my-logger/my-logger.service';
 import { AllExceptionsFilter } from './all-exceptions.filter';
+import { loggerRequestResponse } from './request-response.logger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -24,13 +25,14 @@ async function bootstrap() {
   // For easy checking of ON levels
   const levelOn = `level is ON`;
   const ctx = 'MyLogger from main.ts';
-  myLogger.log(`App on port ${port}`, '** New Start **');
+  myLogger.log(`App on port ${port} **`, '** New Start');
   myLogger.error(`Error ${levelOn}`, '', ctx);
   myLogger.warn(`Warn ${levelOn}`, ctx);
   myLogger.log(`Log ${levelOn}`, ctx);
   myLogger.debug(`Debug ${levelOn}`, ctx);
   myLogger.verbose(`Verbose ${levelOn}`, ctx);
 
+  app.use(loggerRequestResponse);
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
 

@@ -5,15 +5,19 @@ import {
 } from '@nestjs/common';
 
 import { CreateUserDto, UpdatePasswordDto, UserModel } from './dto';
-import { createHash } from 'node:crypto';
 import { DatabaseService } from 'src/database/database.service';
-
-const ALGORITHM = 'sha256';
-const ENCODING = 'hex';
+import { ConfigService } from '@nestjs/config';
+import { compare, genSalt, hash } from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  private saltRounds: number;
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private config: ConfigService,
+  ) {
+    this.saltRounds = +this.config.get<number>('CRYPT_SALT');
+  }
 
   async findAll(): Promise<UserModel[]> {
     return await this.databaseService.extended.user.findMany();
@@ -31,10 +35,10 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto): Promise<UserModel> {
     const { password, login } = createUserDto;
-    const hash = createHash(ALGORITHM).update(password);
+    const hash = await this.getPasswordHash(password);
 
     const result = await this.databaseService.extended.user.create({
-      data: { login, password: hash.digest(ENCODING) },
+      data: { login, password: hash },
     });
 
     if (!result) {
@@ -57,16 +61,13 @@ export class UserService {
     if (!user) {
       throw new NotFoundException();
     }
+    const isSameHash = await compare(oldPassword, user.password);
 
-    const oldPasswordHash = createHash(ALGORITHM)
-      .update(oldPassword)
-      .digest(ENCODING);
-
-    if (oldPasswordHash !== user.password) {
+    if (!isSameHash) {
       throw new ForbiddenException();
     }
 
-    user.password = createHash(ALGORITHM).update(newPassword).digest(ENCODING);
+    user.password = await this.getPasswordHash(newPassword);
 
     const result = await this.databaseService.extended.user.update({
       where: { id },
@@ -84,5 +85,11 @@ export class UserService {
     } catch (error) {
       DatabaseService.handleError(error);
     }
+  }
+
+  private async getPasswordHash(password: string): Promise<string> {
+    const salt = await genSalt(this.saltRounds);
+    const passwordHash = await hash(password, salt);
+    return passwordHash;
   }
 }

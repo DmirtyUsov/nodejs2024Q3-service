@@ -24,10 +24,12 @@ import {
   PutTrack,
 } from './track.swagger';
 import { AuthGuard } from 'src/guard/auth.guard';
+import { ApiAuth } from 'src/swagger.decorators';
 
 @ApiTags('Track')
 @Controller('track')
 @UseGuards(AuthGuard)
+@ApiAuth()
 export class TrackController {
   constructor(private readonly trackService: TrackService) {}
 

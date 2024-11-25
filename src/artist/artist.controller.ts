@@ -24,10 +24,12 @@ import {
 } from './artist.swagger';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guard/auth.guard';
+import { ApiAuth } from 'src/swagger.decorators';
 
 @ApiTags('Artist')
 @Controller('artist')
 @UseGuards(AuthGuard)
+@ApiAuth()
 export class ArtistController {
   constructor(private readonly artistService: ArtistService) {}
 

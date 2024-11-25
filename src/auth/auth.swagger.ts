@@ -1,11 +1,14 @@
 import { applyDecorators } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
 import { TokenDto } from 'src/token/token.dto';
+import { UserModel } from 'src/user/user.model';
 
 export const PostLogin = () => {
   return applyDecorators(
@@ -18,11 +21,30 @@ export const PostLogin = () => {
       type: [TokenDto],
     }),
     ApiForbiddenResponse({
-      description: 'Wrong password',
+      description: `no user with such login, password doesn't match actual one, etc.`,
     }),
-    ApiNotFoundResponse({ description: 'No user with this login' }),
+    ApiBadRequestResponse({
+      description: `no login or password, or they are not a strings`,
+    }),
   );
 };
+
+export const PostSingup = () => {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Singnup',
+      description: 'Adds new user',
+    }),
+    ApiCreatedResponse({
+      description: 'Successful operation.',
+      type: [UserModel],
+    }),
+    ApiBadRequestResponse({
+      description: `no login or password, or they are not a strings`,
+    }),
+  );
+};
+
 export const PostRefresh = () => {
   return applyDecorators(
     ApiOperation({

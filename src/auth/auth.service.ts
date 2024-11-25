@@ -59,7 +59,7 @@ export class AuthService {
     const user = await this.userService.findLogin(payload.login);
 
     if (!user) {
-      throw new NotFoundException('No user with this login');
+      throw new ForbiddenException('No user with this login');
     }
 
     return await this.tokenService.get(payload.userId, payload.login);

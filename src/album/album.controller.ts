@@ -24,10 +24,12 @@ import {
   PutAlbum,
 } from './album.swagger';
 import { AuthGuard } from 'src/guard/auth.guard';
+import { ApiAuth } from 'src/swagger.decorators';
 
 @ApiTags('Album')
 @UseGuards(AuthGuard)
 @Controller('album')
+@ApiAuth()
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 

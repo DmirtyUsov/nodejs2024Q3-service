@@ -25,10 +25,12 @@ import {
 } from './user.swagger';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guard/auth.guard';
+import { ApiAuth } from 'src/swagger.decorators';
 
 @ApiTags('User')
 @Controller('user')
 @UseGuards(AuthGuard)
+@ApiAuth()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

@@ -6,6 +6,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiProperty,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 export const ApiUUIDProperty = ApiProperty({
@@ -92,6 +93,14 @@ export const ApiDelete = (entity: string) => {
     }),
     ApiNotFoundResponse({
       description: `${entity} not found.`,
+    }),
+  );
+};
+
+export const ApiAuth = () => {
+  return applyDecorators(
+    ApiUnauthorizedResponse({
+      description: 'Access token is missing or invalid',
     }),
   );
 };

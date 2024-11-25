@@ -14,10 +14,12 @@ import { FavoritesDto } from './favorites.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { RemoveFavorite, GetFavorites, AddFavorite } from './favs.swagger';
 import { AuthGuard } from 'src/guard/auth.guard';
+import { ApiAuth } from 'src/swagger.decorators';
 
 @ApiTags('Favorites')
 @Controller('favs')
 @UseGuards(AuthGuard)
+@ApiAuth()
 export class FavsController {
   constructor(private readonly favsService: FavsService) {}
 

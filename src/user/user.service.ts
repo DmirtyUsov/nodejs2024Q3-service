@@ -33,6 +33,13 @@ export class UserService {
     return new UserModel(userDto);
   }
 
+  async findLogin(login: string): Promise<UserModel> {
+    const userDto = await this.databaseService.extended.user.findFirst({
+      where: { login },
+    });
+    return userDto;
+  }
+
   async create(createUserDto: CreateUserDto): Promise<UserModel> {
     const { password, login } = createUserDto;
     const hash = await this.getPasswordHash(password);
@@ -61,9 +68,12 @@ export class UserService {
     if (!user) {
       throw new NotFoundException();
     }
-    const isSameHash = await compare(oldPassword, user.password);
+    const isSamePassword = await this.validatePasswords(
+      oldPassword,
+      user.password,
+    );
 
-    if (!isSameHash) {
+    if (!isSamePassword) {
       throw new ForbiddenException();
     }
 
@@ -91,5 +101,12 @@ export class UserService {
     const salt = await genSalt(this.saltRounds);
     const passwordHash = await hash(password, salt);
     return passwordHash;
+  }
+
+  async validatePasswords(
+    password1: string,
+    password2: string,
+  ): Promise<boolean> {
+    return await compare(password1, password2);
   }
 }

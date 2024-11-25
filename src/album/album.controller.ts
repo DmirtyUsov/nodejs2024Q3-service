@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
@@ -22,8 +23,10 @@ import {
   PostAlbum,
   PutAlbum,
 } from './album.swagger';
+import { AuthGuard } from 'src/auth.guard';
 
 @ApiTags('Album')
+@UseGuards(AuthGuard)
 @Controller('album')
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}

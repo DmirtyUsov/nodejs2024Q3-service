@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
 import { ArtistService } from './artist.service';
@@ -22,9 +23,11 @@ import {
   PutArtist,
 } from './artist.swagger';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth.guard';
 
 @ApiTags('Artist')
 @Controller('artist')
+@UseGuards(AuthGuard)
 export class ArtistController {
   constructor(private readonly artistService: ArtistService) {}
 

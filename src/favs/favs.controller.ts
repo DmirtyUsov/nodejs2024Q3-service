@@ -7,14 +7,17 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { FavsService } from './favs.service';
 import { FavoritesDto } from './favorites.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { RemoveFavorite, GetFavorites, AddFavorite } from './favs.swagger';
+import { AuthGuard } from 'src/auth.guard';
 
 @ApiTags('Favorites')
 @Controller('favs')
+@UseGuards(AuthGuard)
 export class FavsController {
   constructor(private readonly favsService: FavsService) {}
 

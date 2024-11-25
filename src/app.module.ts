@@ -9,6 +9,7 @@ import { DatabaseModule } from './database/database.module';
 import { MyLoggerModule } from './my-logger/my-logger.module';
 import { AuthModule } from './auth/auth.module';
 import { TokenModule } from './token/token.module';
+import { GuardModule } from './guard/guard.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TokenModule } from './token/token.module';
     MyLoggerModule,
     AuthModule,
     TokenModule,
+    GuardModule,
   ],
 })
 export class AppModule {}

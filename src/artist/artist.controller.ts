@@ -23,7 +23,7 @@ import {
   PutArtist,
 } from './artist.swagger';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from 'src/auth.guard';
+import { AuthGuard } from 'src/guard/auth.guard';
 
 @ApiTags('Artist')
 @Controller('artist')

@@ -24,7 +24,7 @@ import {
   PutUser,
 } from './user.swagger';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from 'src/auth.guard';
+import { AuthGuard } from 'src/guard/auth.guard';
 
 @ApiTags('User')
 @Controller('user')

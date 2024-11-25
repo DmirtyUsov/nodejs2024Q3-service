@@ -23,7 +23,7 @@ import {
   PostTrack,
   PutTrack,
 } from './track.swagger';
-import { AuthGuard } from 'src/auth.guard';
+import { AuthGuard } from 'src/guard/auth.guard';
 
 @ApiTags('Track')
 @Controller('track')

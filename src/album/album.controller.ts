@@ -23,7 +23,7 @@ import {
   PostAlbum,
   PutAlbum,
 } from './album.swagger';
-import { AuthGuard } from 'src/auth.guard';
+import { AuthGuard } from 'src/guard/auth.guard';
 
 @ApiTags('Album')
 @UseGuards(AuthGuard)

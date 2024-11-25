@@ -13,7 +13,7 @@ import { FavsService } from './favs.service';
 import { FavoritesDto } from './favorites.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { RemoveFavorite, GetFavorites, AddFavorite } from './favs.swagger';
-import { AuthGuard } from 'src/auth.guard';
+import { AuthGuard } from 'src/guard/auth.guard';
 
 @ApiTags('Favorites')
 @Controller('favs')

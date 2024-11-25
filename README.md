@@ -10,7 +10,7 @@
 
 ```
 git clone git@github.com:DmirtyUsov/nodejs2024Q3-service.git
-git checkout part-2
+git checkout part-3
 ```
 
 ## Installing NPM modules
@@ -46,7 +46,19 @@ To run all tests with authorization
 ```
 npm run test:auth
 ```
+### Logs
+Logging levels `MY_LOGGER_LEVEL`   
+  0: ['error'],   
+  1: ['error', 'warn'],   
+  2: ['error', 'warn', 'log'],   
+  3: ['error', 'warn', 'log', 'debug'],   
+  4: ['error', 'warn', 'log', 'debug', 'verbose'],   
+Default value=2   
 
+You can find all entries in the `all-[idx].log` files,   
+and only errors in the `errors-[idx].log` files.   
+See `./logs` folder   
+Maximum size in kB (default is 5kB) for `.log` files, adjustable by `LOG_FILE_SIZE_KB_MAX` variable in `.env`
 ### Auto-fix and format
 
 ```

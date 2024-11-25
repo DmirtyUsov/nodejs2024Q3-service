@@ -1,13 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
+import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
 import { TokenDto } from './token.dto';
 import { PayloadModel } from './payload.model';
 
+// Discrepancy for JwtSignOptions locally and in Docker
+type MyJwtSignOptions = {
+  secret: string;
+  expiresIn: string;
+};
+
 @Injectable()
 export class TokenService {
-  private accessJwtOptions: JwtSignOptions;
-  private refreshJwtOptions: JwtSignOptions;
+  private accessJwtOptions: MyJwtSignOptions;
+  private refreshJwtOptions: MyJwtSignOptions;
 
   constructor(
     private readonly config: ConfigService,
@@ -15,14 +21,13 @@ export class TokenService {
   ) {
     this.accessJwtOptions = {
       secret: this.config.get<string>('JWT_SECRET_KEY') || 'defaultSecrete',
-      accessExpiresIn: this.config.get<string>('TOKEN_EXPIRE_TIME') || '1h',
+      expiresIn: this.config.get<string>('TOKEN_EXPIRE_TIME') || '1h',
     };
     this.refreshJwtOptions = {
       secret:
         this.config.get<string>('JWT_SECRET_REFRESH_KEY') ||
         'defaultRefreshSecrete',
-      accessExpiresIn:
-        this.config.get<string>('TOKEN_REFRESH_EXPIRE_TIME') || '24h',
+      expiresIn: this.config.get<string>('TOKEN_REFRESH_EXPIRE_TIME') || '24h',
     };
   }
 
@@ -33,13 +38,13 @@ export class TokenService {
     };
     const accessOptions = {
       secret: this.accessJwtOptions.secret,
-      expiresIn: this.accessJwtOptions.accessExpiresIn,
+      expiresIn: this.accessJwtOptions.expiresIn,
     };
     const accessToken = await this.jwtService.signAsync(payload, accessOptions);
 
     const refreshOptions = {
       secret: this.refreshJwtOptions.secret,
-      expiresIn: this.refreshJwtOptions.accessExpiresIn,
+      expiresIn: this.refreshJwtOptions.expiresIn,
     };
 
     const refreshToken = await this.jwtService.signAsync(

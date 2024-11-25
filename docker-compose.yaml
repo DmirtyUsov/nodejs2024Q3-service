@@ -1,4 +1,4 @@
-name: hls24q3-part2
+name: hls24q3-part3
 
 services:
   hls-database:
@@ -18,11 +18,12 @@ services:
       - hls-network
 
   hls-app:
-    image: dimausov/hls24q3-app:latest
+    image: dimausov/hls24q3-app:part3
     ports:
       - ${PORT}:${PORT}
     volumes:
       - ./src:/app/src
+      - ./logs:/app/logs
     depends_on:
       - hls-database
     networks:

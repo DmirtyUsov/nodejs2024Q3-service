@@ -4,6 +4,7 @@ import {
   Controller,
   HttpCode,
   Post,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -12,6 +13,9 @@ import { CredentialsDto } from './dto';
 import { UserModel } from 'src/user/user.model';
 import { StatusCodes } from 'http-status-codes';
 import { TokenDto } from 'src/token/token.dto';
+import { RefreshGuard } from 'src/guard/refresh.guard';
+import { RefreshDto } from 'src/token/refresh.dto';
+import { PostLogin, PostRefresh } from './auth.swagger';
 
 @ApiTags('Authentication and Authorization')
 @Controller('auth')
@@ -19,6 +23,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @PostLogin()
   async login(@Body() credentialsDto: CredentialsDto): Promise<TokenDto> {
     return await this.authService.login(credentialsDto);
   }
@@ -31,5 +36,9 @@ export class AuthController {
   }
 
   @Post('refresh')
-  refresh() {}
+  @UseGuards(RefreshGuard)
+  @PostRefresh()
+  async refresh(@Body() refreshDto: RefreshDto): Promise<TokenDto> {
+    return await this.authService.refresh(refreshDto);
+  }
 }

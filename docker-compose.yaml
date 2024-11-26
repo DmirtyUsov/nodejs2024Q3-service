@@ -1,0 +1,43 @@
+name: hls24q3-part3
+
+services:
+  hls-database:
+    image: dimausov/hls24q3-db:latest
+    ports:
+      - 5432:${DB_CONTAINER_PORT}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    container_name: ${DB_CONTAINER_NAME}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - db_logs:/logs
+    restart: always
+    networks:
+      - hls-network
+
+  hls-app:
+    image: dimausov/hls24q3-app:part3
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+    depends_on:
+      - hls-database
+    networks:
+      - hls-network
+    restart: always
+
+networks:
+  hls-network:
+    ipam:
+      driver: default
+      config:
+        - subnet: '192.168.0.0/24'
+          gateway: '192.168.0.1'
+
+volumes:
+  db_data:
+  db_logs:
